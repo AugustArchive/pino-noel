@@ -22,6 +22,7 @@
  */
 
 import { useCallsites } from '../utils';
+import { deprecate } from '../deprecated';
 
 export interface SerializedCallsite {
   eval_invocation: boolean;
@@ -39,27 +40,68 @@ export interface SerializedCallsite {
 export interface SerializedError {
   name: string;
   message: string;
-  stack: SerializedCallsite[];
+  stack?: SerializedCallsite[];
 }
 
-export const error = (error: Error): SerializedError => {
-  const stack = useCallsites(error);
-  return {
-    name: error.name,
-    message: error.message,
-    stack: stack
-      .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
-      .map((site) => ({
-        eval_invocation: site.isEval(),
-        this_context: site.getTypeName() || 'Object',
-        constructor: site.isConstructor(),
-        function: site.getFunctionName() || '<anonymous>',
-        toplevel: site.isToplevel(),
-        native: site.isNative(),
-        method: site.getMethodName() || '<unknown>',
-        file: site.getFileName() || '',
-        line: site.getLineNumber() || -1,
-        col: site.getColumnNumber() || -1
-      }))
+/**
+ * Serializer factory for serializing JavaScript errors to objects that Pino can recognize
+ * @param callsites If the payload should include the callsites (excluding Node internals)
+ * @returns A serializer that can serialize JavaScript errors to what Pino can recognize.
+ */
+export const createErrorSerializer =
+  (callsites = true) =>
+  (error: Error): SerializedError => {
+    if (!callsites) return { name: error.name, message: error.message };
+
+    const stack = useCallsites(error);
+    return {
+      name: error.name,
+      message: error.message,
+      stack: stack
+        .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
+        .map((site) => ({
+          eval_invocation: site.isEval(),
+          this_context: site.getTypeName() || 'Object',
+          constructor: site.isConstructor(),
+          function: site.getFunctionName() || '<anonymous>',
+          toplevel: site.isToplevel(),
+          native: site.isNative(),
+          method: site.getMethodName() || '<unknown>',
+          file: site.getFileName() || '',
+          line: site.getLineNumber() || -1,
+          col: site.getColumnNumber() || -1
+        }))
+    };
   };
-};
+
+/**
+ * Serializer for serializing JavaScript errors with the callsites of that error.
+ * @param error The error
+ * @deprecated This will be removed in v1.2.0, please switch to {@link createErrorSerializer}.
+ * @returns A {@link SerializedError} object that can be serialized.
+ */
+export const error = deprecate(
+  (error: Error): SerializedError => {
+    const stack = useCallsites(error);
+    return {
+      name: error.name,
+      message: error.message,
+      stack: stack
+        .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
+        .map((site) => ({
+          eval_invocation: site.isEval(),
+          this_context: site.getTypeName() || 'Object',
+          constructor: site.isConstructor(),
+          function: site.getFunctionName() || '<anonymous>',
+          toplevel: site.isToplevel(),
+          native: site.isNative(),
+          method: site.getMethodName() || '<unknown>',
+          file: site.getFileName() || '',
+          line: site.getLineNumber() || -1,
+          col: site.getColumnNumber() || -1
+        }))
+    };
+  },
+  '1.2.0',
+  'createErrorSerializer'
+);

@@ -24,7 +24,14 @@
 import type { IncomingMessage } from 'http';
 import { hasOwnProperty } from '@noelware/utils';
 
-export const request = (req: IncomingMessage) => {
+export interface SerializedRequest {
+  headers: Record<string, string>;
+  method: string;
+  url: string;
+  id: string | null;
+}
+
+export const request = (req: IncomingMessage): SerializedRequest => {
   const id: string | null = hasOwnProperty(req, 'id' as any)
     ? typeof (req as unknown as { id: any }).id === 'function'
       ? (req as unknown as { id(): string }).id()
@@ -37,6 +44,6 @@ export const request = (req: IncomingMessage) => {
     id,
     method: req.method!,
     url: hasOwnProperty(req, 'originalUrl' as any) ? req['originalUrl'] : req.url!,
-    headers: req.headers
+    headers: req.headers as any
   };
 };

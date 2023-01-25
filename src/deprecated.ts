@@ -21,21 +21,17 @@
  * SOFTWARE.
  */
 
-export interface LogRecord {
-  [x: string]: any;
+export function deprecate<F extends (...args: any) => any, Args extends any[] = Parameters<F>, RT = ReturnType<F>>(
+  func: F,
+  removedIn: string,
+  alternative: string
+): (...args: Args) => RT {
+  return (...args) => {
+    process.emitWarning(`Method ${func.name || '(anonymous)'} is deprecated`, {
+      code: 'DEPRECATION_WARNING',
+      detail: `Method will be removed in ${removedIn}, please use ${alternative} instead!`
+    });
 
-  hostname: string;
-  level: number;
-  name?: string;
-  time: number | string;
-  msg: string;
-  pid: number;
-}
-
-/**
- * Represents a base formatter that transforms a {@link LogLevel} into
- * a string that the transport can use to log messages
- */
-export abstract class BaseFormatter {
-  abstract transform(record: LogRecord): string;
+    return func(...args);
+  };
 }

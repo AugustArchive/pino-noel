@@ -36,11 +36,12 @@ export class JsonFormatter extends BaseFormatter {
     const payload: Record<string, any> = {
       '@timestamp': new Date(record.time).toISOString(),
       'log.level': levelLabelNames[record.level],
+      'log.name': record.name || 'root',
       hostname: `${username.get()}@${record.hostname}`,
       message: record.msg
     };
 
-    const rest = omit(record, ['hostname', 'level', 'msg', 'time']);
+    const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
     return (
       JSON.stringify({
         ...payload,

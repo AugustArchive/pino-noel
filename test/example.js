@@ -2,10 +2,11 @@ const { default: pino } = require('pino');
 const noelPino = require('../dist');
 
 const log = pino({
+  name: 'test logger',
   level: 'trace',
   serializers: {
-    err: noelPino.serializers.error,
-    error: noelPino.serializers.error
+    err: noelPino.serializers.createErrorSerializer(),
+    error: noelPino.serializers.createErrorSerializer()
   },
   transport: {
     target: '../dist/index.js'

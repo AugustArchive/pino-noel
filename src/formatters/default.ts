@@ -21,79 +21,117 @@
  * SOFTWARE.
  */
 
+import type { SerializedError, SerializedRequest } from '../serializers';
 import { BaseFormatter, type LogRecord } from './base';
 import { levelLabelNames, omit } from '../utils';
-import { EOL, userInfo } from 'os';
 import { hasOwnProperty, Lazy } from '@noelware/utils';
+import { EOL, userInfo } from 'os';
+import { basename } from 'path';
 
 // this is for tsup for not converting colorette to an
 // default export
 import colors = require('colorette');
-import { SerializedError } from '../serializers';
-import { basename } from 'path';
 
-const username = new Lazy(() => {
-  const info = userInfo();
-  return info.username || '(unknown)';
-});
-
-// colours are from
-// https://github.com/charted-dev/charted/blob/1019f58768b881b55a6e5a0f6289e5b1f99ed2c4/modules/logging/src/main/java/org/noelware/charted/logback/composite/LogLevelColorComposite.java
-const levels: Record<number, string> = {
+const defaultLevelColors: Record<number, string> = {
+  // trace
   10: colors.isColorSupported
-    ? `\x1b[38;2;156;156;252m${levelLabelNames[10].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+    ? `\x1b[38;2;163;182;138m${levelLabelNames[10].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[10].toUpperCase().padEnd(5, ' '),
+
+  // debug
   20: colors.isColorSupported
-    ? `\x1b[38;2;241;204;209m${levelLabelNames[20].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+    ? `\x1b[38;2;163;182;138m${levelLabelNames[20].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[20].toUpperCase().padEnd(5, ' '),
+
+  // info
   30: colors.isColorSupported
-    ? `\x1b[38;2;81;81;140m${levelLabelNames[30].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+    ? `\x1b[38;2;178;157;243m${levelLabelNames[30].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[30].toUpperCase().padEnd(5, ' '),
+
+  // warning
   40: colors.isColorSupported
     ? `\x1b[38;2;234;234;208m${levelLabelNames[40].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[40].toUpperCase().padEnd(5, ' '),
+
+  // error
   50: colors.isColorSupported
-    ? `\x1b[38;2;166;76;76m${levelLabelNames[50].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+    ? `\x1b[38;2;153;75;104m${levelLabelNames[50].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[50].toUpperCase().padEnd(5, ' '),
+
+  // fatal
   60: colors.isColorSupported
     ? `\x1b[38;2;166;76;76m${levelLabelNames[60].toUpperCase().padEnd(5, ' ')}\x1b[0m`
     : levelLabelNames[60].toUpperCase().padEnd(5, ' ')
 };
 
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
   dateStyle: 'medium',
   timeStyle: 'long',
   timeZone: process.env.TZ || 'America/Phoenix'
 });
 
-export class DefaultFormatter extends BaseFormatter {
-  override transform(record: LogRecord) {
-    let buf = colors.gray(`[${dateFormatter.format(new Date(record.time))}] `);
-    buf += colors.gray('[');
-    {
-      buf += `${colors.bold(levels[record.level])} ${colors.gray('|')} ${colors.magenta(
-        `${username.get()}@${record.hostname}`
-      )}${colors.gray('/')}${colors.magenta(record.pid)}`;
-    }
-    buf += colors.gray(']');
+const gray = (t: string) => (colors.isColorSupported ? `\x1b[38;2;134;134;134m${t}\x1b[0m` : t);
 
+export class DefaultFormatter extends BaseFormatter {
+  #username: Lazy<string> = new Lazy(() => {
+    const info = userInfo();
+    return info.username || '(unknown)';
+  });
+
+  #dateTimeFormatter: Intl.DateTimeFormat;
+  #levels: Record<number, string>;
+
+  constructor(
+    levels: Record<number, string> = defaultLevelColors,
+    formatter: Intl.DateTimeFormat = defaultDateTimeFormatter
+  ) {
+    super();
+
+    this.#dateTimeFormatter = formatter;
+    this.#levels = levels;
+  }
+
+  override transform(record: LogRecord) {
+    const PIPE = gray('|');
+
+    let buf = gray(`[${this.#dateTimeFormatter.format(new Date(record.time))}] `);
+    buf += gray('[');
+    {
+      const level = colors.bold(this.#levels[record.level]);
+      const hostname = colors.magenta(`${this.#username.get()}@${record.hostname}`);
+      const pid = colors.isColorSupported ? `\x1b[38;2;169;147;227m${record.pid}\x1b[0m` : record.pid;
+      const target = colors.isColorSupported
+        ? `\x1b[38;2;120;231;255m${record.name || 'root'}\x1b[0m`
+        : record.name || 'root';
+
+      // 120, 231, 255
+      buf += `${level} ${target} ${PIPE} ${hostname} ${gray('(')}${pid}${gray(')')}`.trim();
+    }
+    buf += gray(']');
+
+    // insert all the other attributes here
     {
       buf += ' ';
-      // all of the other keys will be presented at tne end of the string
-      // req, err/error, and res won't appear since it'll make it weird appearing here.
       const attrs = Object.entries(
-        omit(record, ['hostname', 'level', 'msg', 'time', 'error', 'req', 'res', 'err', 'pid'])
+        omit(record, ['hostname', 'level', 'msg', 'time', 'error', 'req', 'res', 'err', 'pid', 'name'])
       )
-        .map(([key, value]) => colors.gray(`[${key} ~> ${value}]`))
+        .map(([key, value]) => gray(`[${key}=>${value}]`))
         .join(' ');
+
       if (attrs.length > 0) {
         buf += attrs;
         buf += ' ';
       }
     }
 
+    // append the message if we have it
     if (hasOwnProperty(record, 'msg')) {
       buf += record.msg;
+    }
+
+    if (hasOwnProperty(record, 'req')) {
+      const req: SerializedRequest = record.req;
+      buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}`;
     }
 
     if (hasOwnProperty(record, 'err') || hasOwnProperty(record, 'error')) {
@@ -101,21 +139,23 @@ export class DefaultFormatter extends BaseFormatter {
       buf += EOL;
       buf += `${colors.bold(colors.red(error.name))} :: ${error.message}${EOL}`;
 
-      const cache: string[] = [];
+      if (error.stack !== undefined) {
+        const cache: string[] = [];
 
-      for (const item of error.stack) {
-        if (cache.includes(item.file)) {
-          buf += `       ${colors.dim('~')} ${colors.bold(colors.dim(`${item.file}:${item.line}:${item.col}`))}`;
-          buf += EOL;
-        } else {
-          cache.push(item.file);
-          buf += `   • ${colors.dim(`in ${basename(item.file)}:${item.line}:${item.col}`)}`;
+        for (const item of error.stack) {
+          if (cache.includes(item.file)) {
+            buf += `       ${colors.dim('~')} ${colors.bold(colors.dim(`${item.file}:${item.line}:${item.col}`))}`;
+            buf += EOL;
+          } else {
+            cache.push(item.file);
+            buf += `   • ${colors.dim(`in ${basename(item.file)}:${item.line}:${item.col}`)}`;
 
-          if (item.native) {
-            buf += ' (native method)';
+            if (item.native) {
+              buf += ' (native method)';
+            }
+
+            buf += EOL;
           }
-
-          buf += EOL;
         }
       }
     }

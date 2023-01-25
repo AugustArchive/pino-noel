@@ -4,8 +4,8 @@
 
 **@augu/pino-transport** is an opinionated logging transport for the [Pino](https://getpino.io) logging library. This was made to _not repeat_ what this library entails. If you like it, then install it now:
 
-![default formatter](https://noel-is.gay/images/f39398c6.png)
-![json formatter](https://noel-is.gay/images/250c59e1.png)
+![default formatter](https://noel-is.gay/images/3d87e6a9.png)
+![json formatter](https://noel-is.gay/images/f8d6645d.png)
 
 ```shell
 $ npm i @augu/pino-transport
