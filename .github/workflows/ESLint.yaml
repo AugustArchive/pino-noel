@@ -24,8 +24,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - nightly
-      - main
+      - master
     paths-ignore:
       - '.github/**'
       - '.vscode/**'
@@ -39,7 +38,7 @@ on:
   pull_request:
     types: [opened, synchronize]
     branches:
-      - main
+      - master
     paths-ignore:
       - '.vscode/**'
       - '.husky/**'
