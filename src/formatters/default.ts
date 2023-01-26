@@ -79,15 +79,18 @@ export class DefaultFormatter extends BaseFormatter {
   });
 
   #dateTimeFormatter: Intl.DateTimeFormat;
+  #targetPadding: number;
   #levels: Record<number, string>;
 
   constructor(
     levels: Record<number, string> = defaultLevelColors,
-    formatter: Intl.DateTimeFormat = defaultDateTimeFormatter
+    formatter: Intl.DateTimeFormat = defaultDateTimeFormatter,
+    targetPadding: number = 30
   ) {
     super();
 
     this.#dateTimeFormatter = formatter;
+    this.#targetPadding = targetPadding;
     this.#levels = levels;
   }
 
@@ -101,8 +104,8 @@ export class DefaultFormatter extends BaseFormatter {
       const hostname = colors.magenta(`${this.#username.get()}@${record.hostname}`);
       const pid = colors.isColorSupported ? `\x1b[38;2;169;147;227m${record.pid}\x1b[0m` : record.pid;
       const target = colors.isColorSupported
-        ? `\x1b[38;2;120;231;255m${record.name || 'root'}\x1b[0m`
-        : record.name || 'root';
+        ? `\x1b[38;2;120;231;255m${(record.name || 'root').padEnd(this.#targetPadding, ' ')}\x1b[0m`
+        : (record.name || 'root').padEnd(this.#targetPadding, ' ');
 
       // 120, 231, 255
       buf += `${level} ${target} ${PIPE} ${hostname} ${gray('(')}${pid}${gray(')')}`.trim();

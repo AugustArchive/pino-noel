@@ -24,6 +24,8 @@
 import { useCallsites } from '../utils';
 import { deprecate } from '../deprecated';
 
+export const originalErrorSymbol = Symbol.for('$noel:pino:serialization:originalError');
+
 export interface SerializedCallsite {
   eval_invocation: boolean;
   this_context: string;
@@ -41,6 +43,9 @@ export interface SerializedError {
   name: string;
   message: string;
   stack?: SerializedCallsite[];
+
+  /** The original {@link Error} that was thrown */
+  [originalErrorSymbol]?: Error;
 }
 
 /**
@@ -51,10 +56,23 @@ export interface SerializedError {
 export const createErrorSerializer =
   (callsites = true) =>
   (error: Error): SerializedError => {
-    if (!callsites) return { name: error.name, message: error.message };
+    if (!callsites) {
+      const result: SerializedError = {
+        name: error.name,
+        message: error.message
+      };
+
+      Object.defineProperty(result, originalErrorSymbol, {
+        enumerable: false,
+        value: error
+      });
+
+      return result;
+    }
 
     const stack = useCallsites(error);
-    return {
+
+    const result: SerializedError = {
       name: error.name,
       message: error.message,
       stack: stack
@@ -72,6 +90,13 @@ export const createErrorSerializer =
           col: site.getColumnNumber() || -1
         }))
     };
+
+    Object.defineProperty(result, originalErrorSymbol, {
+      enumerable: false,
+      value: error
+    });
+
+    return result;
   };
 
 /**
