@@ -23,6 +23,7 @@
 
 import { type SerializedRequest, request } from './request';
 import { ServerResponse, STATUS_CODES } from 'http';
+import { hasOwnProperty } from '@noelware/utils';
 
 export interface SerializedResponse {
   status: number;
@@ -31,9 +32,18 @@ export interface SerializedResponse {
   request: SerializedRequest;
 }
 
-export const response = (resp: ServerResponse): SerializedResponse => ({
-  status: resp.statusCode,
-  status_message: resp.statusMessage || STATUS_CODES[resp.statusCode] || 'Unknown',
-  headers: resp.getHeaders() as any,
-  request: request(resp.req)
-});
+export const response = (resp: ServerResponse): SerializedResponse => {
+  // @ts-ignore
+  // This is for fastify usage
+  if (hasOwnProperty(resp, 'raw')) {
+    // @ts-ignore
+    resp = resp.raw;
+  }
+
+  return {
+    status: resp.statusCode,
+    status_message: resp.statusMessage || STATUS_CODES[resp.statusCode] || 'Unknown',
+    headers: resp.getHeaders() as any,
+    request: request(resp.req)
+  };
+};

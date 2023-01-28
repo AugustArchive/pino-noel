@@ -32,16 +32,26 @@ export interface SerializedRequest {
 }
 
 export const request = (req: IncomingMessage): SerializedRequest => {
-  const id: string | null = hasOwnProperty(req, 'id' as any)
-    ? typeof (req as unknown as { id: any }).id === 'function'
-      ? (req as unknown as { id(): string }).id()
-      : (req as any).id || (req as any).info
-      ? (req as any).info.id
-      : null
-    : null;
+  // @ts-ignore
+  // This is for fastify usage
+  if (hasOwnProperty(req, 'raw')) {
+    // @ts-ignore
+    req = req.raw;
+  }
+
+  const getReqId = () => {
+    // @ts-ignore
+    if (hasOwnProperty(req, 'id')) {
+      return typeof (req as unknown as { id: (() => string) | string }).id === 'function'
+        ? (req as unknown as { id: () => string }).id()
+        : (req as unknown as { id: string }).id;
+    }
+
+    return null;
+  };
 
   return {
-    id,
+    id: getReqId(),
     method: req.method!,
     url: hasOwnProperty(req, 'originalUrl' as any) ? req['originalUrl'] : req.url!,
     headers: req.headers as any
