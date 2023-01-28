@@ -75,7 +75,7 @@ import pino from 'pino';
 
 const log = pino({
   serializers: {
-    err: serializers.error,
+    err: serializers.createErrorSerializer(),
     req: serializers.request,
     res: serializers.response
   }
