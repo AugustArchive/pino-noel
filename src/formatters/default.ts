@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-import type { SerializedError, SerializedRequest } from '../serializers';
+import { response, SerializedError, SerializedRequest, SerializedResponse } from '../serializers';
 import { BaseFormatter, type LogRecord } from './base';
 import { levelLabelNames, omit } from '../utils';
 import { hasOwnProperty, Lazy } from '@noelware/utils';
@@ -72,6 +72,12 @@ const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
 
 const gray = (t: string) => (colors.isColorSupported ? `\x1b[38;2;134;134;134m${t}\x1b[0m` : t);
 
+export interface DefaultFormatterOptions {
+  targetPadding?: number;
+  formatter?: Intl.DateTimeFormat;
+  levels?: Record<number, string>;
+}
+
 export class DefaultFormatter extends BaseFormatter {
   #username: Lazy<string> = new Lazy(() => {
     const info = userInfo();
@@ -83,20 +89,20 @@ export class DefaultFormatter extends BaseFormatter {
   #levels: Record<number, string>;
 
   constructor(
-    levels: Record<number, string> = defaultLevelColors,
-    formatter: Intl.DateTimeFormat = defaultDateTimeFormatter,
-    targetPadding: number = 30
+    options: DefaultFormatterOptions = {
+      targetPadding: 30,
+      formatter: defaultDateTimeFormatter,
+      levels: defaultLevelColors
+    }
   ) {
     super();
 
-    this.#dateTimeFormatter = formatter;
-    this.#targetPadding = targetPadding;
-    this.#levels = levels;
+    this.#dateTimeFormatter = options.formatter || defaultDateTimeFormatter;
+    this.#targetPadding = options.targetPadding || 30;
+    this.#levels = options.levels || defaultLevelColors;
   }
 
   override transform(record: LogRecord) {
-    const PIPE = gray('|');
-
     let buf = gray(`[${this.#dateTimeFormatter.format(new Date(record.time))}] `);
     buf += gray('[');
     {
@@ -107,8 +113,7 @@ export class DefaultFormatter extends BaseFormatter {
         ? `\x1b[38;2;120;231;255m${(record.name || 'root').padEnd(this.#targetPadding, ' ')}\x1b[0m`
         : (record.name || 'root').padEnd(this.#targetPadding, ' ');
 
-      // 120, 231, 255
-      buf += `${level} ${target} ${PIPE} ${hostname} ${gray('(')}${pid}${gray(')')}`.trim();
+      buf += `${level} ${target} ${hostname} ${gray('(')}${pid}${gray(')')}`.trim();
     }
     buf += gray(']');
 
@@ -134,7 +139,20 @@ export class DefaultFormatter extends BaseFormatter {
 
     if (hasOwnProperty(record, 'req')) {
       const req: SerializedRequest = record.req;
-      buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}`;
+      const reqId: string | null = hasOwnProperty(record, 'reqId') ? record.reqId : req.id;
+
+      buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${reqId !== null ? ` ${gray(`[${reqId}]`)}` : ''}`;
+    }
+
+    if (hasOwnProperty(record, 'res')) {
+      const res: SerializedResponse = record.res;
+      const time = hasOwnProperty(record, 'responseTime') ? Number(record.responseTime) : null;
+      const reqId: string | null = hasOwnProperty(record, 'reqId') ? record.reqId : res.request.id;
+      const { request: req } = res;
+
+      buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${
+        reqId !== null ? ` ${gray(`[${reqId}]`)}` : ''
+      } -> ${gray(`${res.status} ${res.status_message}`)}${time !== null ? ` ${gray(`[~${time.toFixed(2)}ms]`)}` : ''}`;
     }
 
     if (hasOwnProperty(record, 'err') || hasOwnProperty(record, 'error')) {

@@ -64,14 +64,19 @@ export const createErrorSerializer =
 
       Object.defineProperty(result, originalErrorSymbol, {
         enumerable: false,
-        value: error
+        get() {
+          return error;
+        },
+
+        set(_) {
+          throw new Error('Readonly reference.');
+        }
       });
 
       return result;
     }
 
     const stack = useCallsites(error);
-
     const result: SerializedError = {
       name: error.name,
       message: error.message,
@@ -93,40 +98,14 @@ export const createErrorSerializer =
 
     Object.defineProperty(result, originalErrorSymbol, {
       enumerable: false,
-      value: error
+      get() {
+        return error;
+      },
+
+      set(_) {
+        throw new Error('Readonly reference.');
+      }
     });
 
     return result;
   };
-
-/**
- * Serializer for serializing JavaScript errors with the callsites of that error.
- * @param error The error
- * @deprecated This will be removed in v1.2.0, please switch to {@link createErrorSerializer}.
- * @returns A {@link SerializedError} object that can be serialized.
- */
-export const error = deprecate(
-  (error: Error): SerializedError => {
-    const stack = useCallsites(error);
-    return {
-      name: error.name,
-      message: error.message,
-      stack: stack
-        .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
-        .map((site) => ({
-          eval_invocation: site.isEval(),
-          this_context: site.getTypeName() || 'Object',
-          constructor: site.isConstructor(),
-          function: site.getFunctionName() || '<anonymous>',
-          toplevel: site.isToplevel(),
-          native: site.isNative(),
-          method: site.getMethodName() || '<unknown>',
-          file: site.getFileName() || '',
-          line: site.getLineNumber() || -1,
-          col: site.getColumnNumber() || -1
-        }))
-    };
-  },
-  '1.2.0',
-  'createErrorSerializer'
-);

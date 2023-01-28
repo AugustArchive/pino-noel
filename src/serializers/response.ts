@@ -21,10 +21,19 @@
  * SOFTWARE.
  */
 
+import { type SerializedRequest, request } from './request';
 import { ServerResponse, STATUS_CODES } from 'http';
 
-export const response = (resp: ServerResponse) => ({
+export interface SerializedResponse {
+  status: number;
+  status_message: string;
+  headers: Record<string, string>;
+  request: SerializedRequest;
+}
+
+export const response = (resp: ServerResponse): SerializedResponse => ({
   status: resp.statusCode,
   status_message: resp.statusMessage || STATUS_CODES[resp.statusCode] || 'Unknown',
-  headers: resp.getHeaders()
+  headers: resp.getHeaders() as any,
+  request: request(resp.req)
 });

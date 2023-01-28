@@ -34,11 +34,11 @@ log.info('Hello, world!');
 
 ## Custom Transports
 
-You can create custom transports that the transport will transform the logs to.
+You can create custom transports that the transport will transform the logs to. You will need to create a second file that will be serialized to the proper value instead of a plain object; [related issue (pinojs/pino#262)](https://github.com/pinojs/pino-pretty/issues/262)
 
 ```ts
-import { BaseFormatter, type LogRecord } from '@augu/pino-transport';
-import pino from 'pino';
+// transport.js
+import noelPino, { BaseFormatter, type LogRecord } from '@augu/pino-transport';
 
 class MyFormatter extends BaseFormatter {
   override transform(record: LogRecord) {
@@ -46,15 +46,19 @@ class MyFormatter extends BaseFormatter {
   }
 }
 
+export default (options) =>
+  noelPino({
+    ...options,
+    transport: new MyFormatter()
+  });
+
+// main.js
+import pino from 'pino';
+
 const log = pino({
-  transports: [
-    {
-      target: '@augu/pino-transport',
-      options: {
-        formatter: new MyFormatter()
-      }
-    }
-  ]
+  transport: {
+    target: './transport.js'
+  }
 });
 
 log.info('Hello, world!');

@@ -21,8 +21,9 @@
  * SOFTWARE.
  */
 
-import createAbstractTransport from 'pino-abstract-transport';
 import { BaseFormatter, formatters } from './formatters';
+import type { DefaultFormatterOptions } from './formatters/default';
+import createAbstractTransport from 'pino-abstract-transport';
 import { Transform } from 'stream';
 import SonicBoom from 'sonic-boom';
 import pump from 'pump';
@@ -50,7 +51,7 @@ const transport = ({ transport, json }: TransportOptions) =>
       const wrapper = new Transform({
         objectMode: true,
         autoDestroy: true,
-        transform(chunk, enc, cb) {
+        transform(chunk, _, cb) {
           const line = selectedTransport.transform(typeof chunk === 'string' ? JSON.parse(chunk) : chunk);
           cb(null, line);
         }
