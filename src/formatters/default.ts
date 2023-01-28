@@ -121,7 +121,20 @@ export class DefaultFormatter extends BaseFormatter {
     {
       buf += ' ';
       const attrs = Object.entries(
-        omit(record, ['hostname', 'level', 'msg', 'time', 'error', 'req', 'res', 'err', 'pid', 'name'])
+        omit(record, [
+          'hostname',
+          'level',
+          'msg',
+          'time',
+          'error',
+          'req',
+          'res',
+          'err',
+          'pid',
+          'name',
+          'reqId',
+          'responseTime'
+        ])
       )
         .map(([key, value]) => gray(`[${key}=>${value}]`))
         .join(' ');

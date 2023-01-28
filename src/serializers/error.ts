@@ -80,20 +80,23 @@ export const createErrorSerializer =
     const result: SerializedError = {
       name: error.name,
       message: error.message,
-      stack: stack
-        .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
-        .map((site) => ({
-          eval_invocation: site.isEval(),
-          this_context: site.getTypeName() || 'Object',
-          constructor: site.isConstructor(),
-          function: site.getFunctionName() || '<anonymous>',
-          toplevel: site.isToplevel(),
-          native: site.isNative(),
-          method: site.getMethodName() || '<unknown>',
-          file: site.getFileName() || '',
-          line: site.getLineNumber() || -1,
-          col: site.getColumnNumber() || -1
-        }))
+      stack:
+        stack !== undefined
+          ? stack
+              .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
+              .map((site) => ({
+                eval_invocation: site.isEval(),
+                this_context: site.getTypeName() || 'Object',
+                constructor: site.isConstructor(),
+                function: site.getFunctionName() || '<anonymous>',
+                toplevel: site.isToplevel(),
+                native: site.isNative(),
+                method: site.getMethodName() || '<unknown>',
+                file: site.getFileName() || '',
+                line: site.getLineNumber() || -1,
+                col: site.getColumnNumber() || -1
+              }))
+          : []
     };
 
     Object.defineProperty(result, originalErrorSymbol, {
