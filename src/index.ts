@@ -36,9 +36,10 @@ export { createSerializers };
 export interface TransportOptions {
     transport?: BaseFormatter;
     json?: boolean;
+    dest?: string | number;
 }
 
-const transport = ({ transport, json }: TransportOptions) =>
+const transport = ({ transport, json, dest }: TransportOptions) =>
     createAbstractTransport(
         (stream) => {
             let selectedTransport: BaseFormatter;
@@ -59,13 +60,13 @@ const transport = ({ transport, json }: TransportOptions) =>
                 }
             });
 
-            const dest = new SonicBoom({
+            const destination = new SonicBoom({
                 append: true,
-                dest: 1
+                dest: dest || 1
             });
 
-            stream.on('unknown', (line) => dest.write(`${line}\n`));
-            pump(stream, wrapper, dest);
+            stream.on('unknown', (line) => destination.write(`${line}\n`));
+            pump(stream, wrapper, destination);
         },
         { parse: 'lines' }
     );
