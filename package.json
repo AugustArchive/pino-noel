@@ -1,55 +1,56 @@
 {
-  "name": "@augu/pino-transport",
-  "description": "🐻‍❄️🌲 Pino transport that roughly matches what I like to see in my logs",
-  "version": "1.2.2",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+    "name": "@augu/pino-transport",
+    "description": "🐻‍❄️🌲 Pino transport that roughly matches what I like to see in my logs",
+    "version": "1.3.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist/"
+    ],
+    "exports": {
+        ".": {
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "author": "Noel <cutie@floofy.dev>",
+    "repository": "https://github.com/auguwu/pino-noel",
+    "bugs": "https://github.com/auguwu/pino-noel/issues",
+    "packageManager": "yarn@3.4.1",
+    "scripts": {
+        "build": "yarn fmt && yarn lint && rimraf build && tsup",
+        "lint": "tsx --tsconfig ./scripts/tsconfig.json scripts/eslint.ts",
+        "fmt": "prettier --write **/*.{ts,js,md,json,yml,yaml} --config ./.prettierrc.json"
+    },
+    "dependencies": {
+        "@noelware/utils": "2.2.1",
+        "colorette": "2.0.19",
+        "pino-abstract-transport": "1.0.0",
+        "pump": "3.0.0",
+        "sonic-boom": "3.2.1"
+    },
+    "devDependencies": {
+        "@actions/core": "1.10.0",
+        "@augu/eslint-config": "4.0.1",
+        "@augu/tsconfig": "1.1.1",
+        "@types/eslint": "8.21.1",
+        "@types/node": "18.13.0",
+        "@types/prettier": "2.7.2",
+        "@types/signale": "1.4.4",
+        "@typescript-eslint/eslint-plugin": "5.52.0",
+        "@typescript-eslint/parser": "5.52.0",
+        "eslint": "8.34.0",
+        "eslint-config-prettier": "8.6.0",
+        "log-symbols": "5.1.0",
+        "prettier": "2.8.4",
+        "rimraf": "4.1.2",
+        "signale": "1.4.0",
+        "tsup": "6.6.3",
+        "tsx": "3.12.2",
+        "typescript": "4.9.5"
+    },
+    "optionalDependencies": {
+        "pino": "8.x"
     }
-  },
-  "author": "Noel <cutie@floofy.dev>",
-  "repository": "https://github.com/auguwu/pino-noel",
-  "bugs": "https://github.com/auguwu/pino-noel/issues",
-  "packageManager": "yarn@3.4.1",
-  "scripts": {
-    "build": "yarn fmt && yarn lint && rimraf build && tsup",
-    "lint": "tsx --tsconfig ./scripts/tsconfig.json scripts/eslint.ts",
-    "fmt": "prettier --write **/*.{ts,js,md,json,yml,yaml} --config ./.prettierrc.json"
-  },
-  "dependencies": {
-    "@noelware/utils": "2.2.1",
-    "colorette": "2.0.19",
-    "pino-abstract-transport": "1.0.0",
-    "pump": "3.0.0",
-    "sonic-boom": "3.2.1"
-  },
-  "devDependencies": {
-    "@actions/core": "1.10.0",
-    "@augu/eslint-config": "4.0.1",
-    "@augu/tsconfig": "1.1.1",
-    "@types/eslint": "8.21.1",
-    "@types/node": "18.13.0",
-    "@types/prettier": "2.7.2",
-    "@types/signale": "1.4.4",
-    "@typescript-eslint/eslint-plugin": "5.52.0",
-    "@typescript-eslint/parser": "5.52.0",
-    "eslint": "8.34.0",
-    "eslint-config-prettier": "8.6.0",
-    "log-symbols": "5.1.0",
-    "prettier": "2.8.4",
-    "rimraf": "4.1.2",
-    "signale": "1.4.0",
-    "tsup": "6.6.3",
-    "tsx": "3.12.2",
-    "typescript": "4.9.5"
-  },
-  "optionalDependencies": {
-    "pino": "8.x"
-  }
 }

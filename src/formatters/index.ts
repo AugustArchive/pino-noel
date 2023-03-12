@@ -26,6 +26,6 @@ import { JsonFormatter } from './json';
 
 export { BaseFormatter } from './base';
 export const formatters = {
-  Default: DefaultFormatter,
-  Json: JsonFormatter
+    Default: DefaultFormatter,
+    Json: JsonFormatter
 };

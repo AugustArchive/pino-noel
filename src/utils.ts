@@ -22,34 +22,31 @@
  */
 
 export const levelLabelNames = {
-  10: 'trace',
-  20: 'debug',
-  30: 'info',
-  40: 'warn',
-  50: 'error',
-  60: 'fatal'
+    10: 'trace',
+    20: 'debug',
+    30: 'info',
+    40: 'warn',
+    50: 'error',
+    60: 'fatal'
 };
 
-export const omit = <T extends object = {}, Keys extends keyof T = keyof T>(
-  obj: T,
-  keys: Keys[] = []
-): Omit<T, Keys> => {
-  const object: T = {} as unknown as T;
-  for (const k in obj) {
-    if (!keys.includes(k as unknown as Keys)) {
-      object[k] = obj[k];
+export const omit = <T extends object, Keys extends keyof T = keyof T>(obj: T, keys: Keys[] = []): Omit<T, Keys> => {
+    const object: T = {} as unknown as T;
+    for (const k in obj) {
+        if (!keys.includes(k as unknown as Keys)) {
+            object[k] = obj[k];
+        }
     }
-  }
 
-  return object;
+    return object;
 };
 
 export const useCallsites = (error?: Error): NodeJS.CallSite[] => {
-  let _original = Error.prepareStackTrace;
-  Error.prepareStackTrace = (_, stack) => stack;
+    let _original = Error.prepareStackTrace;
+    Error.prepareStackTrace = (_, stack) => stack;
 
-  const stack = (error ?? new Error()).stack as unknown as NodeJS.CallSite[];
-  Error.prepareStackTrace = _original;
+    const stack = (error ?? new Error()).stack as unknown as NodeJS.CallSite[];
+    Error.prepareStackTrace = _original;
 
-  return stack;
+    return stack;
 };

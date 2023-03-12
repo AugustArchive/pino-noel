@@ -19,14 +19,14 @@ $ pnpm i @augu/pino-transport
 import pino from 'pino';
 
 const log = pino({
-  transports: [
-    {
-      target: '@augu/pino-transport',
-      options: {
-        json: true
-      }
-    }
-  ]
+    transports: [
+        {
+            target: '@augu/pino-transport',
+            options: {
+                json: true
+            }
+        }
+    ]
 });
 
 log.info('Hello, world!');
@@ -41,24 +41,24 @@ You can create custom transports that the transport will transform the logs to. 
 import noelPino, { BaseFormatter, type LogRecord } from '@augu/pino-transport';
 
 class MyFormatter extends BaseFormatter {
-  override transform(record: LogRecord) {
-    return record.msg;
-  }
+    override transform(record: LogRecord) {
+        return record.msg;
+    }
 }
 
 export default (options) =>
-  noelPino({
-    ...options,
-    transport: new MyFormatter()
-  });
+    noelPino({
+        ...options,
+        transport: new MyFormatter()
+    });
 
 // main.js
 import pino from 'pino';
 
 const log = pino({
-  transport: {
-    target: './transport.js'
-  }
+    transport: {
+        target: './transport.js'
+    }
 });
 
 log.info('Hello, world!');
@@ -74,11 +74,11 @@ import { serializers } from '@augu/pino-transport';
 import pino from 'pino';
 
 const log = pino({
-  serializers: {
-    err: serializers.createErrorSerializer(),
-    req: serializers.request,
-    res: serializers.response
-  }
+    serializers: {
+        err: serializers.createErrorSerializer(),
+        req: serializers.request,
+        res: serializers.response
+    }
 });
 
 log.info({ err: new Error('woof') }, 'waff');

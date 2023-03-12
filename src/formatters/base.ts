@@ -22,14 +22,14 @@
  */
 
 export interface LogRecord {
-  [x: string]: any;
+    [x: string]: any;
 
-  hostname: string;
-  level: number;
-  name?: string;
-  time: number | string;
-  msg: string;
-  pid: number;
+    hostname: string;
+    level: number;
+    name?: string;
+    time: number | string;
+    msg: string;
+    pid: number;
 }
 
 /**
@@ -37,5 +37,5 @@ export interface LogRecord {
  * a string that the transport can use to log messages
  */
 export abstract class BaseFormatter {
-  abstract transform(record: LogRecord): string;
+    abstract transform(record: LogRecord): string;
 }

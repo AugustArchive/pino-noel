@@ -27,25 +27,25 @@ import { deprecate } from '../deprecated';
 export const originalErrorSymbol = Symbol.for('$noel:pino:serialization:originalError');
 
 export interface SerializedCallsite {
-  eval_invocation: boolean;
-  this_context: string;
-  constructor: boolean;
-  function: string;
-  toplevel: boolean;
-  native: boolean;
-  method: string;
-  file: string;
-  line: number;
-  col: number;
+    eval_invocation: boolean;
+    this_context: string;
+    constructor: boolean;
+    function: string;
+    toplevel: boolean;
+    native: boolean;
+    method: string;
+    file: string;
+    line: number;
+    col: number;
 }
 
 export interface SerializedError {
-  name: string;
-  message: string;
-  stack?: SerializedCallsite[];
+    name: string;
+    message: string;
+    stack?: SerializedCallsite[];
 
-  /** The original {@link Error} that was thrown */
-  [originalErrorSymbol]?: Error;
+    /** The original {@link Error} that was thrown */
+    [originalErrorSymbol]?: Error;
 }
 
 /**
@@ -54,61 +54,61 @@ export interface SerializedError {
  * @returns A serializer that can serialize JavaScript errors to what Pino can recognize.
  */
 export const createErrorSerializer =
-  (callsites = true) =>
-  (error: Error): SerializedError => {
-    if (!callsites) {
-      const result: SerializedError = {
-        name: error.name,
-        message: error.message
-      };
+    (callsites = true) =>
+    (error: Error): SerializedError => {
+        if (!callsites) {
+            const result: SerializedError = {
+                name: error.name,
+                message: error.message
+            };
 
-      Object.defineProperty(result, originalErrorSymbol, {
-        enumerable: false,
-        get() {
-          return error;
-        },
+            Object.defineProperty(result, originalErrorSymbol, {
+                enumerable: false,
+                get() {
+                    return error;
+                },
 
-        set(_) {
-          throw new Error('Readonly reference.');
+                set(_) {
+                    throw new Error('Readonly reference.');
+                }
+            });
+
+            return result;
         }
-      });
 
-      return result;
-    }
+        const stack = useCallsites(error);
+        const result: SerializedError = {
+            name: error.name,
+            message: error.message,
+            stack:
+                stack !== undefined
+                    ? stack
+                          .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
+                          .map((site) => ({
+                              eval_invocation: site.isEval(),
+                              this_context: site.getTypeName() || 'Object',
+                              constructor: site.isConstructor(),
+                              function: site.getFunctionName() || '<anonymous>',
+                              toplevel: site.isToplevel(),
+                              native: site.isNative(),
+                              method: site.getMethodName() || '<unknown>',
+                              file: site.getFileName() || '',
+                              line: site.getLineNumber() || -1,
+                              col: site.getColumnNumber() || -1
+                          }))
+                    : []
+        };
 
-    const stack = useCallsites(error);
-    const result: SerializedError = {
-      name: error.name,
-      message: error.message,
-      stack:
-        stack !== undefined
-          ? stack
-              .filter((s) => !s.getFileName()?.startsWith('node:') ?? true)
-              .map((site) => ({
-                eval_invocation: site.isEval(),
-                this_context: site.getTypeName() || 'Object',
-                constructor: site.isConstructor(),
-                function: site.getFunctionName() || '<anonymous>',
-                toplevel: site.isToplevel(),
-                native: site.isNative(),
-                method: site.getMethodName() || '<unknown>',
-                file: site.getFileName() || '',
-                line: site.getLineNumber() || -1,
-                col: site.getColumnNumber() || -1
-              }))
-          : []
+        Object.defineProperty(result, originalErrorSymbol, {
+            enumerable: false,
+            get() {
+                return error;
+            },
+
+            set(_) {
+                throw new Error('Readonly reference.');
+            }
+        });
+
+        return result;
     };
-
-    Object.defineProperty(result, originalErrorSymbol, {
-      enumerable: false,
-      get() {
-        return error;
-      },
-
-      set(_) {
-        throw new Error('Readonly reference.');
-      }
-    });
-
-    return result;
-  };

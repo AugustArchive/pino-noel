@@ -22,7 +22,6 @@
  */
 
 import { BaseFormatter, formatters } from './formatters';
-import type { DefaultFormatterOptions } from './formatters/default';
 import createAbstractTransport from 'pino-abstract-transport';
 import { Transform } from 'stream';
 import SonicBoom from 'sonic-boom';
@@ -32,40 +31,40 @@ export { BaseFormatter, formatters };
 export * as serializers from './serializers';
 
 export interface TransportOptions {
-  transport?: BaseFormatter;
-  json?: boolean;
+    transport?: BaseFormatter;
+    json?: boolean;
 }
 
 const transport = ({ transport, json }: TransportOptions) =>
-  createAbstractTransport(
-    (stream) => {
-      let selectedTransport: BaseFormatter;
-      if (json === true) {
-        selectedTransport = new formatters.Json();
-      } else if (transport !== undefined) {
-        selectedTransport = transport;
-      } else {
-        selectedTransport = new formatters.Default();
-      }
+    createAbstractTransport(
+        (stream) => {
+            let selectedTransport: BaseFormatter;
+            if (json === true) {
+                selectedTransport = new formatters.Json();
+            } else if (transport !== undefined) {
+                selectedTransport = transport;
+            } else {
+                selectedTransport = new formatters.Default();
+            }
 
-      const wrapper = new Transform({
-        objectMode: true,
-        autoDestroy: true,
-        transform(chunk, _, cb) {
-          const line = selectedTransport.transform(typeof chunk === 'string' ? JSON.parse(chunk) : chunk);
-          cb(null, line);
-        }
-      });
+            const wrapper = new Transform({
+                objectMode: true,
+                autoDestroy: true,
+                transform(chunk, _, cb) {
+                    const line = selectedTransport.transform(typeof chunk === 'string' ? JSON.parse(chunk) : chunk);
+                    cb(null, line);
+                }
+            });
 
-      const dest = new SonicBoom({
-        append: true,
-        dest: 1
-      });
+            const dest = new SonicBoom({
+                append: true,
+                dest: 1
+            });
 
-      stream.on('unknown', (line) => dest.write(`${line}\n`));
-      pump(stream, wrapper, dest);
-    },
-    { parse: 'lines' }
-  );
+            stream.on('unknown', (line) => dest.write(`${line}\n`));
+            pump(stream, wrapper, dest);
+        },
+        { parse: 'lines' }
+    );
 
 export default transport;

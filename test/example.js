@@ -2,24 +2,24 @@ const { default: pino, transport } = require('pino');
 const noelPino = require('../dist');
 
 const log = pino({
-  name: 'test logger',
-  level: 'trace',
-  serializers: {
-    err: noelPino.serializers.createErrorSerializer(),
-    error: noelPino.serializers.createErrorSerializer()
-  },
-  transport: {
-    target: '../dist/index.js',
-    options: {
-      json: true
+    name: 'test logger',
+    level: 'trace',
+    serializers: {
+        err: noelPino.serializers.createErrorSerializer(),
+        error: noelPino.serializers.createErrorSerializer()
+    },
+    transport: {
+        target: '../dist/index.js',
+        options: {
+            json: true
+        }
     }
-  }
 });
 
 const log2 = pino(
-  transport({
-    target: './test.js'
-  })
+    transport({
+        target: './test.js'
+    })
 );
 
 log.info({ woof: true, error: new Error('heck') }, 'wee woo');
@@ -30,7 +30,7 @@ log.debug('woof: true');
 log.trace('hecc');
 
 function b() {
-  log.error({ error: new TypeError('awwawjsdnajklsadsasd') });
+    log.error({ error: new TypeError('awwawjsdnajklsadsasd') });
 }
 
 b();
@@ -38,12 +38,12 @@ b();
 log2.info('woof');
 
 function c() {
-  function d() {
-    log2.error('what the fuck');
-  }
+    function d() {
+        log2.error('what the fuck');
+    }
 
-  d();
-  log2.warn('what now');
+    d();
+    log2.warn('what now');
 }
 
 c();

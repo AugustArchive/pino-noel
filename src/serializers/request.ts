@@ -25,35 +25,37 @@ import type { IncomingMessage } from 'http';
 import { hasOwnProperty } from '@noelware/utils';
 
 export interface SerializedRequest {
-  headers: Record<string, string>;
-  method: string;
-  url: string;
-  id: string | null;
+    headers: Record<string, string>;
+    method: string;
+    url: string;
+    id: string | null;
 }
 
 export const request = (req: IncomingMessage): SerializedRequest => {
-  // @ts-ignore
-  // This is for fastify usage
-  if (hasOwnProperty(req, 'raw')) {
     // @ts-ignore
-    req = req.raw;
-  }
-
-  const getReqId = () => {
-    // @ts-ignore
-    if (hasOwnProperty(req, 'id')) {
-      return typeof (req as unknown as { id: (() => string) | string }).id === 'function'
-        ? (req as unknown as { id: () => string }).id()
-        : (req as unknown as { id: string }).id;
+    // This is for fastify usage
+    if (hasOwnProperty(req, 'raw')) {
+        // @ts-ignore
+        req = req.raw;
     }
 
-    return null;
-  };
+    const getReqId = () => {
+        // @ts-ignore
+        if (hasOwnProperty(req, 'id')) {
+            return typeof (req as unknown as { id: (() => string) | string }).id === 'function'
+                ? (req as unknown as { id: () => string }).id()
+                : (req as unknown as { id: string }).id;
+        }
 
-  return {
-    id: getReqId(),
-    method: req.method!,
-    url: hasOwnProperty(req, 'originalUrl' as any) ? req['originalUrl'] : req.url!,
-    headers: req.headers as any
-  };
+        return null;
+    };
+
+    return {
+        id: getReqId(),
+        method: req.method!,
+
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        url: hasOwnProperty(req, 'originalUrl' as any) ? req['originalUrl'] : req.url!,
+        headers: req.headers as any
+    };
 };

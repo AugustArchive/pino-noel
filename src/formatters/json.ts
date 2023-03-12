@@ -27,26 +27,26 @@ import { EOL, userInfo } from 'os';
 import { Lazy } from '@noelware/utils';
 
 const username = new Lazy(() => {
-  const info = userInfo();
-  return info.username || '(unknown)';
+    const info = userInfo();
+    return info.username || '(unknown)';
 });
 
 export class JsonFormatter extends BaseFormatter {
-  override transform(record: LogRecord) {
-    const payload: Record<string, any> = {
-      '@timestamp': new Date(record.time).toISOString(),
-      'log.level': levelLabelNames[record.level],
-      'log.name': record.name || 'root',
-      hostname: `${username.get()}@${record.hostname}`,
-      message: record.msg
-    };
+    override transform(record: LogRecord) {
+        const payload: Record<string, any> = {
+            '@timestamp': new Date(record.time).toISOString(),
+            'log.level': levelLabelNames[record.level],
+            'log.name': record.name || 'root',
+            hostname: `${username.get()}@${record.hostname}`,
+            message: record.msg
+        };
 
-    const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
-    return (
-      JSON.stringify({
-        ...payload,
-        ...rest
-      }) + EOL
-    );
-  }
+        const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
+        return (
+            JSON.stringify({
+                ...payload,
+                ...rest
+            }) + EOL
+        );
+    }
 }

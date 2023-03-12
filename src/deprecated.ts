@@ -22,16 +22,16 @@
  */
 
 export function deprecate<F extends (...args: any) => any, Args extends any[] = Parameters<F>, RT = ReturnType<F>>(
-  func: F,
-  removedIn: string,
-  alternative: string
+    func: F,
+    removedIn: string,
+    alternative: string
 ): (...args: Args) => RT {
-  return (...args) => {
-    process.emitWarning(`Method ${func.name || '(anonymous)'} is deprecated`, {
-      code: 'DEPRECATION_WARNING',
-      detail: `Method will be removed in ${removedIn}, please use ${alternative} instead!`
-    });
+    return (...args) => {
+        process.emitWarning(`Method ${func.name || '(anonymous)'} is deprecated`, {
+            code: 'DEPRECATION_WARNING',
+            detail: `Method will be removed in ${removedIn}, please use ${alternative} instead!`
+        });
 
-    return func(...args);
-  };
+        return func(...args);
+    };
 }
