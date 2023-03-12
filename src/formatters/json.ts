@@ -24,7 +24,7 @@
 import { BaseFormatter, type LogRecord } from './base';
 import { levelLabelNames, omit } from '../utils';
 import { EOL, userInfo } from 'os';
-import { Lazy } from '@noelware/utils';
+import { hasOwnProperty, Lazy } from '@noelware/utils';
 
 const username = new Lazy(() => {
     const info = userInfo();
@@ -42,6 +42,11 @@ export class JsonFormatter extends BaseFormatter {
         };
 
         const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
+        if (hasOwnProperty(rest, 'reqId') && hasOwnProperty(rest, 'req') && rest.req.id === null) {
+            rest.req.id = rest.reqId;
+            delete rest.reqId;
+        }
+
         return (
             JSON.stringify({
                 ...payload,
