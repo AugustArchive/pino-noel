@@ -13,6 +13,10 @@ $ yarn add @augu/pino-transport
 $ pnpm i @augu/pino-transport
 ```
 
+## Limitations
+
+-   The library expects you to use `msg` instead anything set in the `name` options for `pino()`.
+
 ## Usage
 
 ```ts
@@ -79,6 +83,36 @@ const log = pino({
         req: serializers.request,
         res: serializers.response
     }
+});
+
+log.info({ err: new Error('woof') }, 'waff');
+```
+
+In **1.3.0**, the library provides a `createSerializers` method to create serializers type-safely:
+
+```ts
+import { createSerializers } from '@augu/pino-transport';
+import pino from 'pino';
+
+const log = pino({
+    serializers: createSerializers({
+        // Enables the request serializer for `request` from the log record.
+        request: false,
+
+        // Enables the response serializer for `response` from the log record.
+        response: false,
+
+        // Enables the error seruializer for `error` from the log record.
+        error: true,
+
+        // List of easier-to-write names when passing in from the log
+        // record.
+        allow: {
+            req: false,
+            res: false,
+            err: true
+        }
+    })
 });
 
 log.info({ err: new Error('woof') }, 'waff');
