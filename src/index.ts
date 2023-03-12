@@ -23,12 +23,15 @@
 
 import { BaseFormatter, formatters } from './formatters';
 import createAbstractTransport from 'pino-abstract-transport';
+import { createSerializers } from './serializers';
 import { Transform } from 'stream';
 import SonicBoom from 'sonic-boom';
 import pump from 'pump';
 
 export { BaseFormatter, formatters };
 export * as serializers from './serializers';
+
+export { createSerializers };
 
 export interface TransportOptions {
     transport?: BaseFormatter;
