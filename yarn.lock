@@ -3550,8 +3550,8 @@ __metadata:
   linkType: hard
 
 "pino@npm:8.x":
-  version: 8.8.0
-  resolution: "pino@npm:8.8.0"
+  version: 8.11.0
+  resolution: "pino@npm:8.11.0"
   dependencies:
     atomic-sleep: ^1.0.0
     fast-redact: ^3.1.1
@@ -3566,7 +3566,7 @@ __metadata:
     thread-stream: ^2.0.0
   bin:
     pino: bin.js
-  checksum: 69256469221b332776333069d637100053eb15dc7baa3f95897d7864bf2e6fd99f15cfd9cfc94b56e7b00da2e6b349c49affcff1abaca9a3d4b7ba63ff86b4f0
+  checksum: 1bcc2b9b448ec9ccef4ea189d5db7d1e0e085f6cd4d7395d087998d90186850ab176edf32a179562337a557aa51eb551ff6318a40af7cdb5963b168f87d35aa8
   languageName: node
   linkType: hard
 
