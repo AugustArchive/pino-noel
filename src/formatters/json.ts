@@ -22,7 +22,7 @@
  */
 
 import { BaseFormatter, type LogRecord } from './base';
-import { levelLabelNames, omit } from '../utils';
+import { levelLabelNames, omit, stripAnsi } from '../utils';
 import { EOL, userInfo } from 'os';
 import { hasOwnProperty, Lazy } from '@noelware/utils';
 
@@ -38,12 +38,15 @@ export class JsonFormatter extends BaseFormatter {
             'log.level': levelLabelNames[record.level],
             'log.name': record.name || 'root',
             hostname: `${username.get()}@${record.hostname}`,
-            message: record.msg
+            message: stripAnsi(record.msg)
         };
 
         const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
-        if (hasOwnProperty(rest, 'reqId') && hasOwnProperty(rest, 'req') && rest.req.id === null) {
-            rest.req.id = rest.reqId;
+        const reqKey = hasOwnProperty(rest, 'req') ? 'req' : 'request';
+        const req = rest[reqKey];
+
+        if (hasOwnProperty(rest, 'reqId') && req !== null && hasOwnProperty(req, 'id')) {
+            rest[reqKey].id = rest.reqId;
             delete rest.reqId;
         }
 

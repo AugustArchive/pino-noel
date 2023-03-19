@@ -50,3 +50,5 @@ export const useCallsites = (error?: Error): NodeJS.CallSite[] => {
 
     return stack;
 };
+
+export const stripAnsi = (text: string) => text.replaceAll(/\u001b\[.*?m/g, '');
