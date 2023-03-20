@@ -75,7 +75,7 @@ __metadata:
     pump: 3.0.0
     rimraf: 4.4.0
     signale: 1.4.0
-    sonic-boom: 3.2.1
+    sonic-boom: 3.3.0
     tsup: 6.7.0
     tsx: 3.12.3
     typescript: 5.0.2
@@ -4006,7 +4006,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sonic-boom@npm:3.2.1, sonic-boom@npm:^3.1.0":
+"sonic-boom@npm:3.3.0":
+  version: 3.3.0
+  resolution: "sonic-boom@npm:3.3.0"
+  dependencies:
+    atomic-sleep: ^1.0.0
+  checksum: 4a290dd0f3edf49894bb72c631ee304dc3f9be0752c43d516808a365f341821f5cf49997c80ee7c0e67167e0e5131dc71afe7c58812858eb965d6b9746c0cac7
+  languageName: node
+  linkType: hard
+
+"sonic-boom@npm:^3.1.0":
   version: 3.2.1
   resolution: "sonic-boom@npm:3.2.1"
   dependencies:
