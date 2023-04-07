@@ -83,7 +83,7 @@ export const createSerializers = (
         serializers.error = err.createErrorSerializer(callsites);
 
         if (hasOwnProperty(allow, 'err') && allow.err === true) {
-            serializers.req = err.createErrorSerializer(callsites);
+            serializers.err = err.createErrorSerializer(callsites);
         }
     }
 

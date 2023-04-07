@@ -185,6 +185,7 @@ export class DefaultFormatter extends BaseFormatter {
                         buf += `       ${colors.dim('~')} ${colors.bold(
                             colors.dim(`${item.file}:${item.line}:${item.col}`)
                         )}`;
+
                         buf += EOL;
                     } else {
                         cache.push(item.file);

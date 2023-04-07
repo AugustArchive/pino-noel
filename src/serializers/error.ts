@@ -22,10 +22,8 @@
  */
 
 import { useCallsites } from '../utils';
-import { deprecate } from '../deprecated';
 
 export const originalErrorSymbol = Symbol.for('$noel:pino:serialization:originalError');
-
 export interface SerializedCallsite {
     eval_invocation: boolean;
     this_context: string;
