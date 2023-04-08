@@ -77,7 +77,7 @@ __metadata:
     signale: 1.4.0
     sonic-boom: 3.3.0
     tsup: 6.7.0
-    tsx: 3.12.3
+    tsx: 3.12.6
     typescript: 5.0.4
   dependenciesMeta:
     pino:
@@ -4339,9 +4339,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:3.12.3":
-  version: 3.12.3
-  resolution: "tsx@npm:3.12.3"
+"tsx@npm:3.12.6":
+  version: 3.12.6
+  resolution: "tsx@npm:3.12.6"
   dependencies:
     "@esbuild-kit/cjs-loader": ^2.4.2
     "@esbuild-kit/core-utils": ^3.0.0
@@ -4352,7 +4352,7 @@ __metadata:
       optional: true
   bin:
     tsx: dist/cli.js
-  checksum: fd04a164d543ff7df030e253280b509257f2d32f9d439d26f33beb1a7c23e91a36fd8d86f150e94187e0598ab58b12e6bc5b7c6798ef0bcc8ffcbc65a31597d2
+  checksum: f503096f3b56ea521eaf8ed65bf7ad6f04749f9251ce168981d7b7483fadd4a6247a35184099c3bc5d43574c6f4eef6f2a58e45e31f002e78ba94120765f95c5
   languageName: node
   linkType: hard
 
