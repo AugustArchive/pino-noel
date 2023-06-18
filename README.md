@@ -2,10 +2,10 @@
 
 > _Noel's opinionated logging transport for [Pino](https://getpino.io)_
 
-**@augu/pino-transport** is an opinionated logging transport for the [Pino](https://getpino.io) logging library. This was made to _not repeat_ what this library entails. If you like it, then install it now:
+**@augu/pino-transport** is an opinionated logging transport for the [Pino](https://getpino.io) logging library. This was made to _not repeat_ what this library entails. If you like it, then install it with:
 
-![default formatter](https://noel-is.gay/images/3d87e6a9.png)
-![json formatter](https://noel-is.gay/images/f8d6645d.png)
+![default formatter](https://noel-is.gay/images/5d85a88c.png)
+![json formatter](https://noel-is.gay/images/e9bc906a.png)
 
 ```shell
 $ npm i @augu/pino-transport
@@ -102,7 +102,7 @@ const log = pino({
         // Enables the response serializer for `response` from the log record.
         response: false,
 
-        // Enables the error seruializer for `error` from the log record.
+        // Enables the error serializer for `error` from the log record.
         error: true,
 
         // List of easier-to-write names when passing in from the log

@@ -37,9 +37,12 @@ export class JsonFormatter extends BaseFormatter {
             '@timestamp': new Date(record.time).toISOString(),
             'log.level': levelLabelNames[record.level],
             'log.name': record.name || 'root',
-            hostname: `${username.get()}@${record.hostname}`,
-            message: stripAnsi(record.msg)
+            hostname: `${username.get()}@${record.hostname}`
         };
+
+        if (hasOwnProperty(record, 'msg')) {
+            payload.message = stripAnsi(record.msg);
+        }
 
         const rest = omit(record, ['hostname', 'level', 'msg', 'time', 'name']);
         const reqKey = hasOwnProperty(rest, 'req') ? 'req' : 'request';

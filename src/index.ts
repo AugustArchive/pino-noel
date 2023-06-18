@@ -39,14 +39,14 @@ export interface TransportOptions {
     dest?: string | number;
 }
 
-const transport = ({ transport, json, dest }: TransportOptions) =>
+const transport = (opts: TransportOptions = {}) =>
     createAbstractTransport(
         (stream) => {
             let selectedTransport: BaseFormatter;
-            if (json === true) {
+            if (opts.json === true) {
                 selectedTransport = new formatters.Json();
-            } else if (transport !== undefined) {
-                selectedTransport = transport;
+            } else if (opts.transport !== undefined) {
+                selectedTransport = opts.transport;
             } else {
                 selectedTransport = new formatters.Default();
             }
@@ -62,7 +62,7 @@ const transport = ({ transport, json, dest }: TransportOptions) =>
 
             const destination = new SonicBoom({
                 append: true,
-                dest: dest || 1
+                dest: opts.dest || 1
             });
 
             stream.on('unknown', (line) => destination.write(`${line}\n`));

@@ -21,54 +21,13 @@
  * SOFTWARE.
  */
 
-import { response, SerializedError, SerializedRequest, SerializedResponse } from '../serializers';
+import type { SerializedError, SerializedRequest, SerializedResponse } from '../serializers';
 import { BaseFormatter, type LogRecord } from './base';
 import { levelLabelNames, omit } from '../utils';
 import { hasOwnProperty, Lazy } from '@noelware/utils';
 import { EOL, userInfo } from 'os';
 import { basename } from 'path';
-
-// this is for tsup for not converting colorette to an
-// default export
-import colors = require('colorette');
-
-const defaultLevelColors: Record<number, string> = {
-    // trace
-    10: colors.isColorSupported
-        ? `\x1b[38;2;163;182;138m${levelLabelNames[10].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[10].toUpperCase().padEnd(5, ' '),
-
-    // debug
-    20: colors.isColorSupported
-        ? `\x1b[38;2;163;182;138m${levelLabelNames[20].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[20].toUpperCase().padEnd(5, ' '),
-
-    // info
-    30: colors.isColorSupported
-        ? `\x1b[38;2;178;157;243m${levelLabelNames[30].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[30].toUpperCase().padEnd(5, ' '),
-
-    // warning
-    40: colors.isColorSupported
-        ? `\x1b[38;2;234;234;208m${levelLabelNames[40].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[40].toUpperCase().padEnd(5, ' '),
-
-    // error
-    50: colors.isColorSupported
-        ? `\x1b[38;2;153;75;104m${levelLabelNames[50].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[50].toUpperCase().padEnd(5, ' '),
-
-    // fatal
-    60: colors.isColorSupported
-        ? `\x1b[38;2;166;76;76m${levelLabelNames[60].toUpperCase().padEnd(5, ' ')}\x1b[0m`
-        : levelLabelNames[60].toUpperCase().padEnd(5, ' ')
-};
-
-const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
-    dateStyle: 'medium',
-    timeStyle: 'long',
-    timeZone: process.env.TZ || 'America/Phoenix'
-});
+import * as colors from 'colorette';
 
 const gray = (t: string) => (colors.isColorSupported ? `\x1b[38;2;134;134;134m${t}\x1b[0m` : t);
 
@@ -78,7 +37,46 @@ export interface DefaultFormatterOptions {
     levels?: Record<number, string>;
 }
 
+/** {@link BaseFormatter} for prettifying Pino logs to the console. */
 export class DefaultFormatter extends BaseFormatter {
+    static defaultLevelPalette: Record<number, string> = {
+        // trace
+        10: colors.isColorSupported
+            ? `\x1b[38;2;163;182;138m${levelLabelNames[10].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[10].toUpperCase().padEnd(5, ' '),
+
+        // debug
+        20: colors.isColorSupported
+            ? `\x1b[38;2;163;182;138m${levelLabelNames[20].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[20].toUpperCase().padEnd(5, ' '),
+
+        // info
+        30: colors.isColorSupported
+            ? `\x1b[38;2;178;157;243m${levelLabelNames[30].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[30].toUpperCase().padEnd(5, ' '),
+
+        // warning
+        40: colors.isColorSupported
+            ? `\x1b[38;2;234;234;208m${levelLabelNames[40].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[40].toUpperCase().padEnd(5, ' '),
+
+        // error
+        50: colors.isColorSupported
+            ? `\x1b[38;2;153;75;104m${levelLabelNames[50].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[50].toUpperCase().padEnd(5, ' '),
+
+        // fatal
+        60: colors.isColorSupported
+            ? `\x1b[38;2;166;76;76m${levelLabelNames[60].toUpperCase().padEnd(5, ' ')}\x1b[0m`
+            : levelLabelNames[60].toUpperCase().padEnd(5, ' ')
+    };
+
+    static defaultDateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+        dateStyle: 'medium',
+        timeStyle: 'long',
+        timeZone: process.env.TZ || 'America/Phoenix'
+    });
+
     #username: Lazy<string> = new Lazy(() => {
         const info = userInfo();
         return info.username || '(unknown)';
@@ -89,35 +87,38 @@ export class DefaultFormatter extends BaseFormatter {
     #levels: Record<number, string>;
 
     constructor(
-        options: DefaultFormatterOptions = {
-            targetPadding: 30,
-            formatter: defaultDateTimeFormatter,
-            levels: defaultLevelColors
+        { formatter, levels, targetPadding }: DefaultFormatterOptions = {
+            targetPadding: 15,
+            formatter: DefaultFormatter.defaultDateTimeFormatter,
+            levels: DefaultFormatter.defaultLevelPalette
         }
     ) {
         super();
 
-        this.#dateTimeFormatter = options.formatter || defaultDateTimeFormatter;
-        this.#targetPadding = options.targetPadding || 30;
-        this.#levels = options.levels || defaultLevelColors;
+        this.#dateTimeFormatter = formatter || DefaultFormatter.defaultDateTimeFormatter;
+        this.#targetPadding = targetPadding || 15;
+        this.#levels = levels || DefaultFormatter.defaultLevelPalette;
     }
 
     override transform(record: LogRecord) {
         let buf = gray(`[${this.#dateTimeFormatter.format(new Date(record.time))}] `);
-        buf += gray('[');
+        const level = colors.bold(this.#levels[record.level]);
+        buf += level;
+
+        buf += gray(' [');
         {
-            const level = colors.bold(this.#levels[record.level]);
             const hostname = colors.magenta(`${this.#username.get()}@${record.hostname}`);
             const pid = colors.isColorSupported ? `\x1b[38;2;169;147;227m${record.pid}\x1b[0m` : record.pid;
             const target = colors.isColorSupported
                 ? `\x1b[38;2;120;231;255m${(record.name || 'root').padEnd(this.#targetPadding, ' ')}\x1b[0m`
                 : (record.name || 'root').padEnd(this.#targetPadding, ' ');
 
-            buf += `${level} ${target} ${hostname} ${gray('(')}${pid}${gray(')')}`.trim();
+            buf += `${target} ${hostname}${gray('[')}${pid}${gray(']')}`;
         }
+
         buf += gray(']');
 
-        // insert all the other attributes here
+        // append other attributes
         {
             buf += ' ';
             const attrs = Object.entries(
@@ -136,40 +137,36 @@ export class DefaultFormatter extends BaseFormatter {
                     'responseTime'
                 ])
             )
-                .map(([key, value]) => gray(`[${key}=>${value}]`))
+                .map(([key, value]) => gray(`[${key}=${value}]`))
                 .join(' ');
 
-            if (attrs.length > 0) {
-                buf += attrs;
-                buf += ' ';
-            }
+            buf += attrs;
         }
 
-        // append the message if we have it
         if (hasOwnProperty(record, 'msg')) {
+            buf += ' :: ';
             buf += record.msg;
         }
 
-        if (hasOwnProperty(record, 'req')) {
-            const req: SerializedRequest = record.req;
-            const reqId: string | null = hasOwnProperty(record, 'reqId') ? record.reqId : req.id;
+        if (hasOwnProperty(record, 'req') || hasOwnProperty(record, 'request')) {
+            const req: SerializedRequest = hasOwnProperty(record, 'req') ? record.req : record.request;
+            const id = hasOwnProperty(record, 'reqId') ? (record.reqId as string) : req.id;
 
-            buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${
-                reqId !== null ? ` ${gray(`[${reqId}]`)}` : ''
-            }`;
+            buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${id !== null ? gray(`(${id})`) : ''}`;
         }
 
-        if (hasOwnProperty(record, 'res')) {
-            const res: SerializedResponse = record.res;
-            const time = hasOwnProperty(record, 'responseTime') ? Number(record.responseTime) : null;
-            const reqId: string | null = hasOwnProperty(record, 'reqId') ? record.reqId : res.request.id;
-            const { request: req } = res;
+        if (hasOwnProperty(record, 'res') || hasOwnProperty(record, 'response')) {
+            const res = hasOwnProperty(record, 'res')
+                ? (record.res as SerializedResponse)
+                : (record.response as SerializedResponse);
 
-            buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${
-                reqId !== null ? ` ${gray(`[${reqId}]`)}` : ''
-            } -> ${gray(`${res.status} ${res.status_message}`)}${
-                time !== null ? ` ${gray(`[~${time.toFixed(2)}ms]`)}` : ''
-            }`;
+            const time = hasOwnProperty(record, 'responseTime') ? Number(record.responseTime) : null;
+            const req = res.request;
+            const id = hasOwnProperty(record, 'reqId') ? (record.reqId as string) : req.id;
+
+            buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${id !== null ? gray(`(${id})`) : ''} ~> ${gray(
+                `${res.status} ${res.status_message}`
+            )}${time !== null ? ` ${gray(`[~${time.toFixed(2)}ms]`)}` : ''}`;
         }
 
         if (hasOwnProperty(record, 'err') || hasOwnProperty(record, 'error')) {

@@ -1,4 +1,4 @@
-const { default: pino, transport } = require('pino');
+const { default: pino } = require('pino');
 const noelPino = require('../dist');
 
 const log = pino({
@@ -16,11 +16,16 @@ const log = pino({
     }
 });
 
-const log2 = pino(
-    transport({
-        target: './test.js'
-    })
-);
+const log2 = pino({
+    name: 'test logger #2',
+    serializers: {
+        err: noelPino.serializers.createErrorSerializer(),
+        error: noelPino.serializers.createErrorSerializer()
+    },
+    transport: {
+        target: '../dist/index.js'
+    }
+});
 
 log.info({ woof: true, error: new Error('heck') }, 'wee woo');
 log.warn('humanity is fucked');
@@ -40,10 +45,16 @@ log2.info('woof');
 function c() {
     function d() {
         log2.error('what the fuck');
+
+        function e() {
+            log2.fatal({ err: new Error('does this work?') });
+        }
+
+        e();
     }
 
     d();
-    log2.warn('what now');
+    log2.warn({ hello: 'world' }, 'what now');
 }
 
 c();

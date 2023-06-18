@@ -2,7 +2,7 @@
     "extends": "@augu/tsconfig/dom.json",
     "compilerOptions": {
         "moduleResolution": "node",
-        "removeComments": true,
+        "removeComments": false,
         "types": ["node"],
         "rootDir": "src/",
         "noEmit": true // unbuild does this for us
