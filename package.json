@@ -1,7 +1,7 @@
 {
     "name": "@augu/pino-transport",
     "description": "🐻‍❄️🌲 Pino transport that roughly matches what I like to see in my logs",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [

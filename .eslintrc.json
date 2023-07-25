@@ -5,12 +5,24 @@
             "files": ["./src/**/*.{ts,tsx}"],
             "parserOptions": {
                 "project": "./tsconfig.json"
+            },
+            "rules": {
+                "@typescript-eslint/no-useless-constructor": "off",
+                "@typescript-eslint/no-throw-literal": "off",
+                "@typescript-eslint/await-thenable": "off",
+                "@typescript-eslint/dot-notation": "off"
             }
         },
         {
             "files": ["./scripts/**/*.{ts,tsx}"],
             "parserOptions": {
                 "project": "./scripts/tsconfig.json"
+            },
+            "rules": {
+                "@typescript-eslint/no-useless-constructor": "off",
+                "@typescript-eslint/no-throw-literal": "off",
+                "@typescript-eslint/await-thenable": "off",
+                "@typescript-eslint/dot-notation": "off"
             }
         }
     ]

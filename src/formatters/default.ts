@@ -118,39 +118,42 @@ export class DefaultFormatter extends BaseFormatter {
 
         buf += gray(']');
 
-        // append other attributes
-        {
-            buf += ' ';
-            const attrs = Object.entries(
-                omit(record, [
-                    'hostname',
-                    'level',
-                    'msg',
-                    'time',
-                    'error',
-                    'req',
-                    'res',
-                    'err',
-                    'pid',
-                    'name',
-                    'reqId',
-                    'responseTime'
-                ])
-            )
-                .map(([key, value]) => gray(`[${key}=${value}]`))
-                .join(' ');
-
-            buf += attrs;
-        }
-
         if (hasOwnProperty(record, 'msg')) {
-            buf += ' :: ';
+            buf += ' ';
             buf += record.msg;
         }
 
+        // append other attributes
+        buf += ' ';
+        const attrs = Object.entries(
+            omit(record, [
+                'hostname',
+                'level',
+                'msg',
+                'time',
+                'error',
+                'req',
+                'res',
+                'err',
+                'pid',
+                'name',
+                'reqId',
+                'responseTime',
+                'request',
+                'response'
+            ])
+        )
+            .map(([key, value]) => gray(`${key}=${value}`))
+            .join(' ');
+
+        buf += attrs;
         if (hasOwnProperty(record, 'req') || hasOwnProperty(record, 'request')) {
             const req: SerializedRequest = hasOwnProperty(record, 'req') ? record.req : record.request;
-            const id = hasOwnProperty(record, 'reqId') ? (record.reqId as string) : req.id;
+            const id = hasOwnProperty(record, 'reqId')
+                ? (record.reqId as string)
+                : hasOwnProperty(req, 'id')
+                ? req.id
+                : null;
 
             buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${id !== null ? gray(`(${id})`) : ''}`;
         }
@@ -162,7 +165,11 @@ export class DefaultFormatter extends BaseFormatter {
 
             const time = hasOwnProperty(record, 'responseTime') ? Number(record.responseTime) : null;
             const req = res.request;
-            const id = hasOwnProperty(record, 'reqId') ? (record.reqId as string) : req.id;
+            const id = hasOwnProperty(record, 'reqId')
+                ? (record.reqId as string)
+                : hasOwnProperty(req, 'id')
+                ? req.id
+                : null;
 
             buf += ` ${gray(`${req.method.toUpperCase()} ${req.url}`)}${id !== null ? gray(`(${id})`) : ''} ~> ${gray(
                 `${res.status} ${res.status_message}`
@@ -172,21 +179,23 @@ export class DefaultFormatter extends BaseFormatter {
         if (hasOwnProperty(record, 'err') || hasOwnProperty(record, 'error')) {
             const error: SerializedError = hasOwnProperty(record, 'err') ? record.err : record.error;
             buf += EOL;
-            buf += `${colors.bold(colors.red(error.name))} :: ${error.message}${EOL}`;
+            buf += `${colors.bold(colors.red(error.name))}: ${error.message}${EOL}`;
 
-            if (error.stack !== undefined) {
+            if (hasOwnProperty(error, 'stack')) {
                 const cache: string[] = [];
 
-                for (const item of error.stack) {
+                for (const item of error.stack!) {
                     if (cache.includes(item.file)) {
-                        buf += `       ${colors.dim('~')} ${colors.bold(
+                        buf += `       ${colors.dim('•')} ${colors.bold(
                             colors.dim(`${item.file}:${item.line}:${item.col}`)
                         )}`;
 
                         buf += EOL;
                     } else {
                         cache.push(item.file);
-                        buf += `   • ${colors.dim(`in ${basename(item.file)}:${item.line}:${item.col}`)}`;
+                        buf += `   ${colors.dim('•')} ${colors.dim(
+                            `in ${basename(item.file)}:${item.line}:${item.col}`
+                        )}`;
 
                         if (item.native) {
                             buf += ' (native method)';
