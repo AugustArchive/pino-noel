@@ -26,7 +26,7 @@
     "dependencies": {
         "@noelware/utils": "2.4.0",
         "colorette": "2.0.20",
-        "pino-abstract-transport": "1.0.0",
+        "pino-abstract-transport": "1.1.0",
         "pump": "3.0.0",
         "sonic-boom": "3.3.0"
     },
