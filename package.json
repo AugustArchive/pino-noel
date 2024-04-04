@@ -48,7 +48,7 @@
         "signale": "1.4.0",
         "tsup": "8.0.2",
         "tsx": "3.13.0",
-        "typescript": "5.4.3"
+        "typescript": "5.4.4"
     },
     "optionalDependencies": {
         "pino": "8.x"
