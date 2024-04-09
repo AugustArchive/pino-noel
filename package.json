@@ -17,7 +17,7 @@
     "author": "Noel <cutie@floofy.dev>",
     "repository": "https://github.com/auguwu/pino-noel",
     "bugs": "https://github.com/auguwu/pino-noel/issues",
-    "packageManager": "yarn@3.8.1",
+    "packageManager": "yarn@4.1.1",
     "scripts": {
         "build": "yarn fmt && yarn lint && rimraf build && tsup",
         "lint": "tsx --tsconfig ./scripts/tsconfig.json scripts/eslint.ts",
