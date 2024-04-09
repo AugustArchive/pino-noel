@@ -47,7 +47,7 @@
         "rimraf": "5.0.5",
         "signale": "1.4.0",
         "tsup": "8.0.2",
-        "tsx": "3.13.0",
+        "tsx": "3.14.0",
         "typescript": "5.4.4"
     },
     "optionalDependencies": {
